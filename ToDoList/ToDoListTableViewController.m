@@ -10,11 +10,6 @@
 #import "ToDoItem.h"
 #import "AddToDoItemViewController.h"
 
-@interface ToDoListTableViewController ()
-
-@property NSMutableArray *toDoItems;
-
-@end
 
 @implementation ToDoListTableViewController
 
@@ -38,19 +33,47 @@
     ToDoItem *item3 = [[ToDoItem alloc] init];
     item3.itemName = @"Read a book";
     [self.toDoItems addObject:item3];
+}
+
+- (void)loadData {
+    NSString* filename = [NSHomeDirectory() stringByAppendingPathComponent:@"/Documents/ToDoList"];
     
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
+        NSLog(@"File Exists!");
+        self.toDoItems = [NSKeyedUnarchiver unarchiveObjectWithFile:filename];
+    } else {
+        NSLog(@"No File! Loading dummy data.");
+        [self loadInitialData];
+    }
+    
+}
+
+- (void)saveData {
+    NSString* filename = [NSHomeDirectory() stringByAppendingPathComponent:@"/Documents/ToDoList"];
+    if ([NSKeyedArchiver archiveRootObject:self.toDoItems toFile:filename])
+        NSLog(@"Object was serialized to disk");
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     self.toDoItems = [[NSMutableArray alloc] init];
-    [self loadInitialData];
+    // [self loadInitialData];
+    [self loadData];
+    
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector(saveData)
+                                                 name: UIApplicationDidEnterBackgroundNotification
+                                               object: nil];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)deinit {
+    [[NSNotificationCenter defaultCenter] removeObserver: (self)];
 }
 
 #pragma mark - Table view data source
@@ -80,6 +103,14 @@
     return cell;
 }
 
+#pragma mark - Table view delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    ToDoItem *tappedItem = [self.toDoItems objectAtIndex:indexPath.row];
+    tappedItem.completed = !tappedItem.completed;
+    [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+}
+
 /*
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -88,17 +119,18 @@
 }
 */
 
-/*
+
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         // Delete the row from the data source
+        [self.toDoItems removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
     }   
 }
-*/
+
 
 /*
 // Override to support rearranging the table view.
@@ -124,12 +156,5 @@
 }
 */
 
-#pragma mark - Table view delegate
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:NO];
-    ToDoItem *tappedItem = [self.toDoItems objectAtIndex:indexPath.row];
-    tappedItem.completed = !tappedItem.completed;
-    [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-}
 
 @end

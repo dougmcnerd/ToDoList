@@ -10,4 +10,18 @@
 
 @implementation ToDoItem
 
+- (id)initWithCoder:(NSCoder *)decoder {
+    if (self = [super init]) {
+        self.itemName = [decoder decodeObjectForKey:kField1Key];
+        self.completed = [decoder decodeBoolForKey:kField2Key];
+    }
+    
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+    [encoder encodeObject:self.itemName forKey:kField1Key];
+    [encoder encodeBool:self.completed forKey:kField2Key];
+}
+
 @end

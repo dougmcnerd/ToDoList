@@ -8,7 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
+
 @interface ToDoListTableViewController : UITableViewController
+
+@property NSMutableArray *toDoItems;
+@property NSString *filename;
 
 - (IBAction)unwindToList:(UIStoryboardSegue *)segue;
 

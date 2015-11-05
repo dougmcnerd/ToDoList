@@ -8,7 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ToDoItem : NSObject
+#define    kField1Key    @"itemName"
+#define    kField2Key    @"completed"
+
+@interface ToDoItem : NSObject <NSCoding>
 
 @property NSString *itemName;
 @property BOOL completed;
